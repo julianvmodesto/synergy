@@ -1,0 +1,33 @@
+##
+# Requirements:
+#   - docker-compose version 1.5.0rc1 and greater (supporting env variables in docker-compose.yml)
+#   - linux (you cannot use this with MacOS X and boot2docker)
+#
+# How to use:
+#   1. copy ./doc/synergy.conf.sample to ./config/synergy.conf
+#   2. edit to your needs.  Use `synergy-docker` as the screen name for this machine.
+#   3. to run a server: `docker-compose up -d server`
+#      to run a client: `docker-compose up -d client`
+##
+
+server:
+  container_name: synergy-server
+  build: .
+  ports:
+    - "24800:24800"
+  environment:
+    DISPLAY: ${DISPLAY}
+  volumes:
+    - "/tmp/.X11-unix:/tmp/.X11-unix"
+    - "${PWD}/config:/config"
+  command: "/usr/src/synergy/bin/synergys -a 0.0.0.0:24800 -d INFO --name synergy-docker -f -c /config/synergy.conf"
+
+client:
+  container_name: synergy-client
+  build: .
+  environment:
+    DISPLAY: ${DISPLAY}
+  volumes:
+    - "/tmp/.X11-unix:/tmp/.X11-unix"
+    - "${PWD}/config:/config"
+  command: "/usr/src/synergy/bin/synergyc -a 0.0.0.0:24800 -d INFO --name synergy-docker -f -c /config/synergy.conf"
